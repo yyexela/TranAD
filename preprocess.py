@@ -47,7 +47,7 @@ def convertNumpy(df):
 	return (x - x.min(0)) / (x.ptp(0) + 1e-4)
 
 def load_data(dataset):
-	folder = os.path.join(output_folder, dataset)
+	folder = os.path.join(output_folder, dataset) # output_folder = "processed"
 	os.makedirs(folder, exist_ok=True)
 	if dataset == 'synthetic':
 		train_file = os.path.join(data_folder, dataset, 'synthetic_data_with_anomaly-s-1.csv')
@@ -137,21 +137,31 @@ def load_data(dataset):
 			np.save(os.path.join(folder, f'{file}.npy'), eval(file))
 	elif dataset in ['SMAP', 'MSL']:
 		dataset_folder = 'data/SMAP_MSL'
-		file = os.path.join(dataset_folder, 'labeled_anomalies.csv')
-		values = pd.read_csv(file)
-		values = values[values['spacecraft'] == dataset]
-		filenames = values['chan_id'].values.tolist()
+		labels = os.path.join(dataset_folder, 'labeled_anomalies.csv')
+		values = pd.read_csv(labels)
+		values = values[values['spacecraft'] == dataset] # Extract SMAP or MSL specifically
+		filenames = values['chan_id'].values.tolist() # Get names of training/testing files
+		# For each track, create a new set of labels the same size as the input track
+		#   where the columns are all 1 if the timestamp is anomalous
 		for fn in filenames:
+			# Load training/testing data
 			train = np.load(f'{dataset_folder}/train/{fn}.npy')
 			test = np.load(f'{dataset_folder}/test/{fn}.npy')
+			# Scale training data to be in [0,1), testing data uses scales from training data, not necessarily in [0,1)
 			train, min_a, max_a = normalize3(train)
 			test, _, _ = normalize3(test, min_a, max_a)
+			# Save data in "processed/{SMAP|MSL}"
 			np.save(f'{folder}/{fn}_train.npy', train)
 			np.save(f'{folder}/{fn}_test.npy', test)
+			# 
 			labels = np.zeros(test.shape)
+			#         [for the specific track fn    ][get list of anomaly timestamps... as a string?]
 			indices = values[values['chan_id'] == fn]['anomaly_sequences'].values[0]
+			# Make the list like "[[a, b], [c, d]]" as ["a", "b", "c", "d"]
 			indices = indices.replace(']', '').replace('[', '').split(', ')
+			# Convert the list of strings to a list of ints
 			indices = [int(i) for i in indices]
+			# Set all columns at timestamp ranges indicated by anomalies as 1
 			for i in range(0, len(indices), 2):
 				labels[indices[i]:indices[i+1], :] = 1
 			np.save(f'{folder}/{fn}_labels.npy', labels)
