@@ -147,9 +147,13 @@ def load_data(dataset):
 			# Load training/testing data
 			train = np.load(f'{dataset_folder}/train/{fn}.npy')
 			test = np.load(f'{dataset_folder}/test/{fn}.npy')
+			print(f"fn: {fn}")
 			# Scale training data to be in [0,1), testing data uses scales from training data, not necessarily in [0,1)
+			# Training data scaled per-column, for SMAP rows is time series and columns is parameters
 			train, min_a, max_a = normalize3(train)
 			test, _, _ = normalize3(test, min_a, max_a)
+			print(train.shape)
+			print(test.shape)
 			# Save data in "processed/{SMAP|MSL}"
 			np.save(f'{folder}/{fn}_train.npy', train)
 			np.save(f'{folder}/{fn}_test.npy', test)
