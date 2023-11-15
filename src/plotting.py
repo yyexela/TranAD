@@ -17,6 +17,8 @@ def smooth(y, box_pts=1):
     return y_smooth
 
 def plotter(name, y_true, y_pred, ascore, labels):
+	print("labels:")
+	print(labels)
 	if 'TranAD' in name: y_true = torch.roll(y_true, 1, 0)
 	os.makedirs(os.path.join('plots', name), exist_ok=True)
 	pdf = PdfPages(f'plots/{name}/output.pdf')

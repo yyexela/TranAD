@@ -320,6 +320,8 @@ if __name__ == '__main__':
 	model.eval()
 	print(f'{color.HEADER}Testing {args.model} on {args.dataset}{color.ENDC}')
 	loss, y_pred = backprop(0, model, testD, testO, optimizer, scheduler, training=False)
+	print("y_pred:")
+	print(y_pred.shape)
 
 	### Plot curves
 	if not args.test:
