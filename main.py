@@ -250,7 +250,11 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 			return loss.detach().numpy(), y_pred.detach().numpy()
 	elif 'TranAD' in model.name:
 		l = nn.MSELoss(reduction = 'none')
+		# data shape: 2872 x 10 x 25
+		# 			  num_windows, window_size, num_params
+		# Note: each window is padded from the left initially
 		data_x = torch.DoubleTensor(data); dataset = TensorDataset(data_x, data_x)
+		# batch_size: 128
 		bs = model.batch if training else len(data)
 		dataloader = DataLoader(dataset, batch_size = bs)
 		n = epoch + 1; w_size = model.n_window
@@ -262,7 +266,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 				elem = window[-1, :, :].view(1, local_bs, feats)
 				z = model(window, elem)
 				l1 = l(z, elem) if not isinstance(z, tuple) else (1 / n) * l(z[0], elem) + (1 - 1/n) * l(z[1], elem)
-				if isinstance(z, tuple): z = z[1]
+				if isinstance(z, tuple): z = z[1] # Not used?
 				l1s.append(torch.mean(l1).item())
 				loss = torch.mean(l1)
 				optimizer.zero_grad()
