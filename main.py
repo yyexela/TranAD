@@ -13,6 +13,8 @@ from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn as nn
 from time import time
 from pprint import pprint
+import sys
+sys.path.insert(0, '/home/alexey/School/Research/submodules')
 # from beepy import beep
 
 def convert_to_windows(data, model):
