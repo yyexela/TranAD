@@ -255,7 +255,8 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		# data shape: 2872 x 10 x 25
 		# 			  num_windows, window_size, num_params
 		# Note: each window is padded from the left initially
-		data_x = torch.DoubleTensor(data); dataset = TensorDataset(data_x, data_x)
+		data_x = torch.DoubleTensor(data)
+		dataset = TensorDataset(data_x, data_x)
 		# batch_size: 128
 		bs = model.batch if training else len(data)
 		dataloader = DataLoader(dataset, batch_size = bs)
@@ -329,7 +330,7 @@ if __name__ == '__main__':
 
 	### Plot curves
 	if not args.test:
-		if 'TranAD' in model.name: testO = torch.roll(testO, 1, 0) 
+		if 'TranAD' in model.name: testO = torch.roll(testO, 1, 0) # Moves last time step to first time step
 		plotter(f'{args.model}_{args.dataset}', testO, y_pred, loss, labels)
 
 	### Scores
