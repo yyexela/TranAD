@@ -255,7 +255,8 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		# data shape: 2872 x 10 x 25
 		# 			  num_windows, window_size, num_params
 		# Note: each window is padded from the left initially
-		data_x = torch.DoubleTensor(data)
+		data_x = data.clone().detach()
+		data_x = data_x.double()
 		dataset = TensorDataset(data_x, data_x)
 		# batch_size: 128
 		bs = model.batch if training else len(data)

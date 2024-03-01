@@ -4,6 +4,7 @@ from src.folderconstants import *
 # Threshold parameters
 lm_d = {
 		'SMD': [(0.99995, 1.04), (0.99995, 1.06)],
+		'SMD2': [(0.99995, 1.04), (0.99995, 1.06)],
 		'synthetic': [(0.999, 1), (0.999, 1)],
 		'SWaT': [(0.993, 1), (0.993, 1)],
 		'UCR': [(0.993, 1), (0.99935, 1)],
@@ -19,6 +20,7 @@ lm = lm_d[args.dataset][1 if 'TranAD' in args.model else 0]
 # Hyperparameters
 lr_d = {
 		'SMD': 0.0001, 
+		'SMD2': 0.0001, 
 		'synthetic': 0.0001, 
 		'SWaT': 0.008, 
 		'SMAP': 0.001, 
@@ -34,6 +36,7 @@ lr = lr_d[args.dataset]
 # Debugging
 percentiles = {
 		'SMD': (98, 2000),
+		'SMD2': (98, 2000),
 		'synthetic': (95, 10),
 		'SWaT': (95, 10),
 		'SMAP': (97, 5000),
