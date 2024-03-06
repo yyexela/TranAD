@@ -75,27 +75,21 @@ def adjust_predicts(score, label,
         return predict
 
 
-def calc_seq(score, label, threshold, calc_latency=False):
+def calc_seq(score, label, threshold):
     """
-    Calculate f1 score for a score sequence
+    Find the f1 score by from provided threshold.
+    Method from MTAD-GAT (https://github.com/ML4ITS/mtad-gat-pytorch)
     """
-    if calc_latency:
-        predict, latency = adjust_predicts(score, label, threshold, calc_latency=calc_latency)
-        t = list(calc_point2point(predict, label))
-        t.append(latency)
-        return t
-    else:
-        predict = adjust_predicts(score, label, threshold, calc_latency=calc_latency)
-        return calc_point2point(predict, label)
-
+    predict, latency = adjust_predicts(score, label, threshold, calc_latency=True)
+    return calc_point2point(predict, label), latency
 
 def bf_search(score, label, start, end=None, step_num=1, display_freq=1, verbose=True):
     """
     Find the best-f1 score by searching best `threshold` in [`start`, `end`).
-    Returns:
-        list: list for results
-        float: the `threshold` for best-f1
+    Method from MTAD-GAT (https://github.com/ML4ITS/mtad-gat-pytorch)
     """
+
+    print(f"Finding best f1-score by searching for threshold..")
     if step_num is None or end is None:
         end = start
         step_num = 1
@@ -103,18 +97,31 @@ def bf_search(score, label, start, end=None, step_num=1, display_freq=1, verbose
     if verbose:
         print("search range: ", search_lower_bound, search_lower_bound + search_range)
     threshold = search_lower_bound
-    m = (-1., -1., -1.)
+    m = (-1.0, -1.0, -1.0)
     m_t = 0.0
+    m_l = 0
     for i in range(search_step):
         threshold += search_range / float(search_step)
-        target = calc_seq(score, label, threshold, calc_latency=True)
+        target, latency = calc_seq(score, label, threshold)
         if target[0] > m[0]:
             m_t = threshold
             m = target
+            m_l = latency
         if verbose and i % display_freq == 0:
             print("cur thr: ", threshold, target, m, m_t)
-    print(m, m_t)
-    return m, m_t
+
+    return {
+        "bf_f1": m[0],
+        "bf_precision": m[1],
+        "bf_recall": m[2],
+        "bf_TP": m[3],
+        "bf_TN": m[4],
+        "bf_FP": m[5],
+        "bf_FN": m[6],
+        'bf_ROC/AUC': m[7],
+        "bf_threshold": m_t,
+        "bf_latency": m_l,
+    }
 
 
 def pot_eval(init_score, score, label, q=1e-5, level=0.02):
@@ -151,14 +158,14 @@ def pot_eval(init_score, score, label, q=1e-5, level=0.02):
     p_t = calc_point2point(pred, label)
     # print('POT result: ', p_t, pot_th, p_latency)
     return {
-        'f1': p_t[0],
-        'precision': p_t[1],
-        'recall': p_t[2],
-        'TP': p_t[3],
-        'TN': p_t[4],
-        'FP': p_t[5],
-        'FN': p_t[6],
-        'ROC/AUC': p_t[7],
-        'threshold': pot_th,
+        'pot-f1': p_t[0],
+        'pot-precision': p_t[1],
+        'pot-recall': p_t[2],
+        'pot-TP': p_t[3],
+        'pot-TN': p_t[4],
+        'pot-FP': p_t[5],
+        'pot-FN': p_t[6],
+        'pot-ROC/AUC': p_t[7],
+        'pot-threshold': pot_th,
         # 'pot-latency': p_latency
     }, np.array(pred)

@@ -40,3 +40,43 @@ def getresults2(df, result):
 		results2[a] = df2[a]
 	results2['f1*'] = 2 * results2['precision'] * results2['recall'] / (results2['precision'] + results2['recall'])
 	return results2
+
+def bf_search(score, label, start, end=None, step_num=1, display_freq=1, verbose=True):
+    """
+    Find the best-f1 score by searching best `threshold` in [`start`, `end`).
+    Method from MTAD-GAT (https://github.com/ML4ITS/mtad-gat-pytorch)
+    """
+
+    print(f"Finding best f1-score by searching for threshold..")
+    if step_num is None or end is None:
+        end = start
+        step_num = 1
+    search_step, search_range, search_lower_bound = step_num, end - start, start
+    if verbose:
+        print("search range: ", search_lower_bound, search_lower_bound + search_range)
+    threshold = search_lower_bound
+    m = (-1.0, -1.0, -1.0)
+    m_t = 0.0
+    m_l = 0
+    for i in range(search_step):
+        threshold += search_range / float(search_step)
+        target, latency = calc_seq(score, label, threshold)
+        if target[0] > m[0]:
+            m_t = threshold
+            m = target
+            m_l = latency
+        if verbose and i % display_freq == 0:
+            print("cur thr: ", threshold, target, m, m_t)
+
+    return {
+        "bf-f1": m[0],
+        "bf-precision": m[1],
+        "bf-recall": m[2],
+        "bf-TP": m[3],
+        "bf-TN": m[4],
+        "bf-FP": m[5],
+        "bf-FN": m[6],
+        'bf-ROC/AUC': m[7],
+        "bf-threshold": m_t,
+        "bf-latency": m_l,
+    }

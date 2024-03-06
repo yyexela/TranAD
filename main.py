@@ -346,6 +346,10 @@ if __name__ == '__main__':
 	lossTfinal, lossFinal = np.mean(lossT, axis=1), np.mean(loss, axis=1)
 	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
 	result, _ = pot_eval(lossTfinal, lossFinal, labelsFinal)
+	if 0:
+		end = int(np.mean(lossFinal)+np.std(lossFinal)*3)
+		bf_eval = bf_search(lossFinal, labelsFinal, start=0, end=end, step_num=end*4, verbose=False)
+		result.update(bf_eval)
 	result.update(hit_att(loss, labels))
 	result.update(ndcg(loss, labels))
 	print(df)
