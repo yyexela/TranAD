@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import statistics
 import os, torch
+from pathlib import Path
 import numpy as np
 import sys
-sys.path.insert(0, '/home/alexey/School/Research/submodules')
+research_dir = Path(os.getcwd()).parent.parent
+sys.path.insert(0, os.path.join(research_dir, 'submodules'))
 
 plt.style.use(['science', 'ieee'])
 plt.rcParams["text.usetex"] = False

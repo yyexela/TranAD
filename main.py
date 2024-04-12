@@ -1,5 +1,6 @@
 import pickle
 import os
+from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 from src.models import *
@@ -14,7 +15,8 @@ import torch.nn as nn
 from time import time
 from pprint import pprint
 import sys
-sys.path.insert(0, '/home/alexey/School/Research/submodules')
+research_dir = Path(os.getcwd()).parent.parent
+sys.path.insert(0, os.path.join(research_dir, 'submodules'))
 # from beepy import beep
 
 def convert_to_windows(data, model):
